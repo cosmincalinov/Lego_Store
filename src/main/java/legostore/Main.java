@@ -1,11 +1,9 @@
 package legostore;
 
-import legostore.model.AgeGroup;
-import legostore.model.Client;
-import legostore.model.LegoSet;
-import legostore.model.Theme;
+import legostore.model.*;
 import legostore.repository.*;
 
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
@@ -25,7 +23,7 @@ public class Main {
                     addNewLegoSet(scanner);
                     break;
                 case "3":
-                    //
+                    // addSaleToProduct()
                     break;
                 case "4":
                     addItemToWishlist(scanner);
@@ -46,7 +44,7 @@ public class Main {
                     listLegoSetDetails(scanner);
                     break;
                 case "10":
-                    // createNewMinifig();
+                    createNewMinifig(scanner);
                     break;
                 case "0":
                     System.out.println("Exiting...");
@@ -217,5 +215,64 @@ public class Main {
             return;
         }
         System.out.println(client.getWishlist());
+    }
+
+    public static void createNewMinifig(Scanner scanner) {
+        System.out.println("Let's build a new Minifig!");
+
+        // 1. Select head
+        System.out.println("Enter head piece traits:");
+        System.out.println(" 1. Color (e.g. 'red'): ");
+        String headCol = scanner.nextLine();
+        System.out.println(" 2. Price (e.g. '17.5'): ");
+        double headPrice = Double.parseDouble(scanner.nextLine());
+        Piece head = new Piece(PieceType.HEAD, headCol, headPrice);
+
+        // 2. Select body
+        System.out.println("Enter body piece traits:");
+        System.out.println(" 1. Color (e.g. 'blue'): ");
+        String bodyCol = scanner.nextLine();
+        System.out.println(" 2. Price (e.g. '15.5'): ");
+        double bodyPrice = Double.parseDouble(scanner.nextLine());
+        Piece body = new Piece(PieceType.BODY, bodyCol, bodyPrice);
+
+        // 3. Select legs
+        System.out.println("Enter legs piece traits:");
+        System.out.println(" 1. Color (e.g. 'green'): ");
+        String legsCol = scanner.nextLine();
+        System.out.println(" 2. Price (e.g. '13.5'): ");
+        double legsPrice = Double.parseDouble(scanner.nextLine());
+        Piece legs = new Piece(PieceType.LEGS, legsCol, legsPrice);
+
+        // 4. Select accessory
+        System.out.println("Enter accessory piece traits:");
+        System.out.println(" 1. Color (e.g. 'yellow'): ");
+        String accCol = scanner.nextLine();
+        System.out.println(" 2. Price (e.g. '11.5'): ");
+        double accPrice = Double.parseDouble(scanner.nextLine());
+        Piece acc = new Piece(PieceType.ACCESSORY, accCol, accPrice);
+
+        // 5. Name the minifig
+        System.out.println("Give your minifig a name: ");
+        String minifigName = scanner.nextLine();
+
+        // 6. Create minifig
+        HashMap<PieceType, Piece> fig = new HashMap<>();
+        fig.put(PieceType.HEAD, head);
+        fig.put(PieceType.BODY, body);
+        fig.put(PieceType.LEGS, legs);
+        fig.put(PieceType.ACCESSORY, acc);
+
+        Minifigure minifig = new Minifigure(minifigName, fig);
+        System.out.println("You built: " + minifig);
+
+        // 7. Ask to buy
+        System.out.println("Would you like to buy this minifig? (y/n): ");
+        String buy = scanner.nextLine().trim().toLowerCase();
+        if (buy.equals("y")) {
+            System.out.println("Congratulations, you bought " + minifigName + "!");
+        } else {
+            System.out.println("Minifig creation complete. Not purchased.");
+        }
     }
 }
