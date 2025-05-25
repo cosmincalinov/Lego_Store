@@ -1,0 +1,221 @@
+package legostore;
+
+import legostore.model.AgeGroup;
+import legostore.model.Client;
+import legostore.model.LegoSet;
+import legostore.model.Theme;
+import legostore.repository.*;
+
+import java.util.Scanner;
+
+public class Main {
+    private static LegoSetRepository repo = new LegoSetRepository();
+    private static ClientRepository clientRepo = new ClientRepository();
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            printMenu();
+            String option = scanner.nextLine();
+            switch (option) {
+                case "1":
+                    addNewClient(scanner);
+                    break;
+                case "2":
+                    addNewLegoSet(scanner);
+                    break;
+                case "3":
+                    //
+                    break;
+                case "4":
+                    addItemToWishlist(scanner);
+                    break;
+                case "5":
+                    removeItemFromWishlist(scanner);
+                    break;
+                case "6":
+                    listWishlist(scanner);
+                    break;
+                case "7":
+                    listAllLegoSets();
+                    break;
+                case "8":
+                    listAllClients();
+                    break;
+                case "9":
+                    listLegoSetDetails(scanner);
+                    break;
+                case "10":
+                    // createNewMinifig();
+                    break;
+                case "0":
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+
+    private static void printMenu() {
+        System.out.println("Choose an option:");
+        System.out.println("1. Add a new client");
+        System.out.println("2. Add a new Lego set");
+        System.out.println("3. Add a new wishlist");
+        System.out.println("4. Add item to wishlist");
+        System.out.println("5. Remove item from wishlist");
+        System.out.println("6. List wishlist");
+        System.out.println("7. List all Lego sets");
+        System.out.println("8. List all clients");
+        System.out.println("9. View Lego set details");
+        System.out.println("0. Exit");
+    }
+
+    public static void addNewLegoSet(Scanner scanner) {
+        try {
+            System.out.print("Enter the set ID: ");
+            long setId = Long.parseLong(scanner.nextLine());
+
+            if (repo.containsSet(setId)) {
+                System.out.println("A set with this ID already exists.");
+                return;
+            }
+
+            System.out.print("Enter the name of the set: ");
+            String name = scanner.nextLine();
+
+            System.out.print("Enter the number of pieces: ");
+            int pieces = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("Available themes: ");
+            for (Theme t : Theme.values()) System.out.print(t + " ");
+            System.out.println();
+            System.out.print("Enter the theme: ");
+            Theme theme = Theme.valueOf(scanner.nextLine().trim().toUpperCase());
+
+            System.out.print("Available age groups: ");
+            for (AgeGroup ag : AgeGroup.values()) System.out.print(ag + " ");
+            System.out.println();
+            System.out.print("Enter the age group: ");
+            AgeGroup ageGroup = AgeGroup.valueOf(scanner.nextLine().trim().toUpperCase());
+
+            System.out.print("Enter the price: ");
+            double price = Double.parseDouble(scanner.nextLine());
+
+            LegoSet set = new LegoSet(setId, pieces, name, theme, price, ageGroup);
+            repo.addSet(set);
+            System.out.println("Lego set added successfully.");
+        } catch (Exception e) {
+            System.out.println("Failed to add Lego set: " + e.getMessage());
+        }
+    }
+
+    public static void listAllLegoSets() {
+        for(LegoSet set : repo.getAllSets()) {
+            System.out.println(set);
+        }
+    }
+
+    public static void listLegoSetDetails(Scanner scanner) {
+        System.out.print("Enter the set ID: ");
+        long setId = Long.parseLong(scanner.nextLine());
+        LegoSet set = repo.getSet(setId);
+        if(set == null) {
+            System.out.println("No set found with that ID.");
+        } else {
+            System.out.println(set);
+        }
+    }
+
+    public static void addNewClient(Scanner scanner ) {
+        try {
+            System.out.println("Enter client ID:");
+            long clientId = Long.parseLong(scanner.nextLine().trim());
+            if (clientRepo.containsClient(clientId)) {
+                System.out.println("A client with this ID already exists.");
+                return;
+            }
+
+            System.out.println("Enter client first name:");
+            String firstName = scanner.nextLine().trim();
+
+            System.out.println("Enter client last name:");
+            String lastName = scanner.nextLine().trim();
+
+            System.out.println("Enter client phone number:");
+            String phoneNumber = scanner.nextLine().trim();
+
+            Client client = new Client(clientId, firstName, lastName, phoneNumber);
+            clientRepo.addClient(client);
+            System.out.println("Client added successfully.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid ID. Please enter a number.");
+        }
+    }
+
+    public static void listAllClients() {
+        for(Client client : clientRepo.getAllClients()) {
+            System.out.println(client);
+        }
+    }
+
+    public static void addItemToWishlist(Scanner scanner) {
+        System.out.print("Enter client ID: ");
+        long clientId = Long.parseLong(scanner.nextLine());
+        Client client = clientRepo.getClient(clientId);
+        if (client == null) {
+            System.out.println("No client found with that ID.");
+            return;
+        }
+
+        System.out.print("Enter Lego set ID to add: ");
+        long setId = Long.parseLong(scanner.nextLine());
+        LegoSet legoSet = repo.getSet(setId);
+        if (legoSet == null) {
+            System.out.println("No Lego set found with that ID.");
+            return;
+        }
+
+        if (client.getWishlist().addLegoSet(legoSet)) {
+            System.out.println("Lego set added to wishlist.");
+        } else {
+            System.out.println("Set is already in the wishlist.");
+        }
+    }
+
+    public static void removeItemFromWishlist(Scanner scanner) {
+        System.out.print("Enter client ID: ");
+        long clientId = Long.parseLong(scanner.nextLine());
+        Client client = clientRepo.getClient(clientId);
+        if (client == null) {
+            System.out.println("No client found with that ID.");
+            return;
+        }
+
+        System.out.print("Enter Lego set ID to remove: ");
+        long setId = Long.parseLong(scanner.nextLine());
+        LegoSet legoSet = repo.getSet(setId);
+        if (legoSet == null) {
+            System.out.println("No Lego set found with that ID.");
+            return;
+        }
+
+        if (client.getWishlist().removeLegoSet(legoSet)) {
+            System.out.println("Lego set removed from wishlist.");
+        } else {
+            System.out.println("Set is not in the wishlist.");
+        }
+    }
+
+    public static void listWishlist(Scanner scanner) {
+        System.out.print("Enter client ID: ");
+        long clientId = Long.parseLong(scanner.nextLine());
+        Client client = clientRepo.getClient(clientId);
+        if (client == null) {
+            System.out.println("No client found with that ID.");
+            return;
+        }
+        System.out.println(client.getWishlist());
+    }
+}
