@@ -1,12 +1,21 @@
 package legostore.model;
 
-public class LegoSet extends Product {
+import legostore.observer.Observer;
+import legostore.observer.Subject;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class LegoSet extends Product implements Subject {
     private final long id;
     private final int pieceCount;
     private final Theme theme;
     private final AgeGroup ageGroup;
     private boolean onSale = false;
     private double salePrice = 0.0;
+
+    private Set<Observer> observers = new HashSet<>();
+
     // private final Set<Minifigure> minifigures;
 
     public LegoSet(long id,int pieceCount, /*Set<Minifigure> minifigures,*/
@@ -31,6 +40,7 @@ public class LegoSet extends Product {
     public void setSalePrice(double salePrice) {
         this.onSale = true;
         this.salePrice = salePrice;
+        notifyObservers("Lego set '" + getName() + "' is now on sale for $" + salePrice + ".");
     }
 
     public void removeSale() {
@@ -70,4 +80,22 @@ public class LegoSet extends Product {
     public int hashCode() {
         return Long.hashCode(id);
     }
+
+    @Override
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers(String message) {
+        for (Observer o : observers) {
+            o.update(message);
+        }
+    }
+
 }

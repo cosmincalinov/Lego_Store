@@ -1,6 +1,8 @@
 package legostore.model;
 
-public class Client {
+import legostore.observer.Observer;
+
+public class Client implements Observer {
     private final long id;
     private final String firstName, lastName;
     private final String phone;
@@ -11,7 +13,7 @@ public class Client {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
-        this.wishlist = new Wishlist();
+        this.wishlist = new Wishlist(this);
     }
 
     public long getId() { return id; }
@@ -40,5 +42,10 @@ public class Client {
     @Override
     public int hashCode() {
         return Long.hashCode(id);
+    }
+
+    @Override
+    public void update(String message) {
+        System.out.println("Notification for " + getFirstName() + ": " + message);
     }
 }
