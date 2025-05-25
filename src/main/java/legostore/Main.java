@@ -23,7 +23,7 @@ public class Main {
                     addNewLegoSet(scanner);
                     break;
                 case "3":
-                    // addSaleToProduct()
+                    addSaleToLegoSet(scanner);
                     break;
                 case "4":
                     addItemToWishlist(scanner);
@@ -60,7 +60,7 @@ public class Main {
         System.out.println("Choose an option:");
         System.out.println("1. Add a new client");
         System.out.println("2. Add a new Lego set");
-        System.out.println("3. Add a new wishlist");
+        System.out.println("3. Add sale to a lego set");
         System.out.println("4. Add item to wishlist");
         System.out.println("5. Remove item from wishlist");
         System.out.println("6. List wishlist");
@@ -274,5 +274,24 @@ public class Main {
         } else {
             System.out.println("Minifig creation complete. Not purchased.");
         }
+    }
+
+    public static void addSaleToLegoSet(Scanner scanner) {
+        System.out.print("Enter the set ID to put on sale: ");
+        long setId = Long.parseLong(scanner.nextLine());
+        LegoSet set = repo.getSet(setId);
+        if (set == null) {
+            System.out.println("No set found with that ID.");
+            return;
+        }
+        System.out.println("Current price: " + set.getPrice());
+        System.out.print("Enter new sale price: ");
+        double salePrice = Double.parseDouble(scanner.nextLine());
+        if (salePrice >= set.getPrice()) {
+            System.out.println("Sale price must be less than current price.");
+            return;
+        }
+        set.setSalePrice(salePrice);
+        System.out.println(set.getName() + " is now on sale for " + salePrice + "!");
     }
 }
