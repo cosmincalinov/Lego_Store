@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class LegoSet extends Product implements Subject {
-    private final long id;
+    private long id;
     private final int pieceCount;
     private final Theme theme;
     private final AgeGroup ageGroup;
@@ -98,4 +98,7 @@ public class LegoSet extends Product implements Subject {
         }
     }
 
+    public void setId(long aLong) {
+        this.id = aLong;
+    }
 }
