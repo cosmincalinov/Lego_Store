@@ -13,6 +13,8 @@ public class LegoSet extends Product implements Subject {
     private final AgeGroup ageGroup;
     private boolean onSale = false;
     private double salePrice = 0.0;
+    // private int quantity = 0;
+
 
     private Set<Observer> observers = new HashSet<>();
 

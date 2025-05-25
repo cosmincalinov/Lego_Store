@@ -1,13 +1,15 @@
 package legostore;
 
+import legostore.dao.LegoSetDao;
 import legostore.model.*;
 import legostore.repository.*;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
-    private static LegoSetRepository repo = new LegoSetRepository();
+    private static LegoSetRepository repo = new LegoSetRepository(new LegoSetDao());
     private static ClientRepository clientRepo = new ClientRepository();
 
     public static void main(String[] args) {
@@ -90,7 +92,8 @@ public class Main {
             for (Theme t : Theme.values()) System.out.print(t + " ");
             System.out.println();
             System.out.print("Enter the theme: ");
-            Theme theme = Theme.valueOf(scanner.nextLine().trim().toUpperCase());
+            String themeInput = scanner.nextLine().trim().toUpperCase().replace(' ', '_');
+            Theme theme = Theme.valueOf(themeInput);
 
             System.out.print("Available age groups: ");
             for (AgeGroup ag : AgeGroup.values()) System.out.print(ag + " ");
@@ -110,19 +113,27 @@ public class Main {
     }
 
     public static void listAllLegoSets() {
-        for(LegoSet set : repo.getAllSets()) {
-            System.out.println(set);
+        try {
+            for (LegoSet set : repo.getAllLegoSets()) {
+                System.out.println(set);
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to retrieve Lego sets from database: " + e.getMessage());
         }
     }
 
     public static void listLegoSetDetails(Scanner scanner) {
         System.out.print("Enter the set ID: ");
         long setId = Long.parseLong(scanner.nextLine());
-        LegoSet set = repo.getSet(setId);
-        if(set == null) {
-            System.out.println("No set found with that ID.");
-        } else {
-            System.out.println(set);
+        try {
+            LegoSet set = repo.getLegoSetFromDatabase(setId);
+            if (set == null) {
+                System.out.println("No set found with that ID in the database.");
+            } else {
+                System.out.println(set);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving Lego set: " + e.getMessage());
         }
     }
 
