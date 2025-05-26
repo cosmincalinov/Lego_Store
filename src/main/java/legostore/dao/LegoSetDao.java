@@ -19,7 +19,7 @@ public class LegoSetDao {
             stmt.setInt(2, legoSet.getPieceCount());
             stmt.setString(3, legoSet.getTheme().toString());
             stmt.setDouble(4, legoSet.getPrice());
-            stmt.setString(5, legoSet.getAgeGroup().toString());
+            stmt.setString(5, legoSet.getAgeGroup().name());
             stmt.executeUpdate();
 
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -58,7 +58,7 @@ public class LegoSetDao {
             stmt.setInt(2, legoSet.getPieceCount());
             stmt.setString(3, legoSet.getTheme().toString());
             stmt.setDouble(4, legoSet.getPrice());
-            stmt.setString(5, legoSet.getAgeGroup().toString());
+            stmt.setString(5, legoSet.getAgeGroup().name());
             stmt.setLong(6, legoSet.getId());
             stmt.executeUpdate();
         }
