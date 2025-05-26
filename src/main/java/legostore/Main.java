@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 public class Main {
     private static LegoSetRepository repo = new LegoSetRepository(new LegoSetDao());
@@ -47,13 +48,13 @@ public class Main {
                     addSaleToLegoSet(scanner);
                     break;
                 case "4":
-                    addItemToWishlist(scanner);
+                    addItemToWishlist(clientDao,scanner);
                     break;
                 case "5":
-                    removeItemFromWishlist(scanner);
+                    removeItemFromWishlist(clientDao, scanner);
                     break;
                 case "6":
-                    listWishlist(scanner);
+                    listWishlist(clientDao, scanner);
                     break;
                 case "7":
                     listAllLegoSets();
@@ -111,14 +112,13 @@ public class Main {
             for (Theme t : Theme.values()) System.out.print(t + " ");
             System.out.println();
             System.out.print("Enter the theme: ");
-            String themeInput = scanner.nextLine().trim().toUpperCase().replace(' ', '_');
-            Theme theme = Theme.valueOf(themeInput);
+            Theme theme = Theme.fromInput(scanner.nextLine());
 
             System.out.print("Available age groups: ");
             for (AgeGroup ag : AgeGroup.values()) System.out.print(ag + " ");
             System.out.println();
-            System.out.print("Enter the age group: ");
-            AgeGroup ageGroup = AgeGroup.valueOf(scanner.nextLine().trim().toUpperCase());
+            System.out.print("Enter the age group (toddler, child, teen, adult): ");
+            AgeGroup ageGroup = AgeGroup.fromInput(scanner.nextLine());
 
             System.out.print("Enter the price: ");
             double price = Double.parseDouble(scanner.nextLine());
@@ -191,63 +191,48 @@ public class Main {
         }
     }
 
-    public static void addItemToWishlist(Scanner scanner) {
+    public static void addItemToWishlist(ClientDao clientDao, Scanner scanner) {
         System.out.print("Enter client ID: ");
         long clientId = Long.parseLong(scanner.nextLine());
-        Client client = clientRepo.getClient(clientId);
-        if (client == null) {
-            System.out.println("No client found with that ID.");
-            return;
-        }
-
-        System.out.print("Enter Lego set ID to add: ");
-        long setId = Long.parseLong(scanner.nextLine());
-        LegoSet legoSet = repo.getSet(setId);
-        if (legoSet == null) {
-            System.out.println("No Lego set found with that ID.");
-            return;
-        }
-
-        if (client.getWishlist().addLegoSet(legoSet)) {
+        System.out.print("Enter Lego Set ID to add to wishlist: ");
+        long legoSetId = Long.parseLong(scanner.nextLine());
+        try {
+            clientDao.addLegoSetToWishlist(clientId, legoSetId);
             System.out.println("Lego set added to wishlist.");
-        } else {
-            System.out.println("Set is already in the wishlist.");
+        } catch (SQLException e) {
+            System.out.println("Failed to add to wishlist: " + e.getMessage());
         }
     }
 
-    public static void removeItemFromWishlist(Scanner scanner) {
+    public static void removeItemFromWishlist(ClientDao clientDao, Scanner scanner) {
         System.out.print("Enter client ID: ");
         long clientId = Long.parseLong(scanner.nextLine());
-        Client client = clientRepo.getClient(clientId);
-        if (client == null) {
-            System.out.println("No client found with that ID.");
-            return;
-        }
-
-        System.out.print("Enter Lego set ID to remove: ");
-        long setId = Long.parseLong(scanner.nextLine());
-        LegoSet legoSet = repo.getSet(setId);
-        if (legoSet == null) {
-            System.out.println("No Lego set found with that ID.");
-            return;
-        }
-
-        if (client.getWishlist().removeLegoSet(legoSet)) {
+        System.out.print("Enter Lego Set ID to remove from wishlist: ");
+        long legoSetId = Long.parseLong(scanner.nextLine());
+        try {
+            clientDao.removeLegoSetFromWishlist(clientId, legoSetId);
             System.out.println("Lego set removed from wishlist.");
-        } else {
-            System.out.println("Set is not in the wishlist.");
+        } catch (SQLException e) {
+            System.out.println("Failed to remove from wishlist: " + e.getMessage());
         }
     }
 
-    public static void listWishlist(Scanner scanner) {
+    public static void listWishlist(ClientDao clientDao, Scanner scanner) {
         System.out.print("Enter client ID: ");
         long clientId = Long.parseLong(scanner.nextLine());
-        Client client = clientRepo.getClient(clientId);
-        if (client == null) {
-            System.out.println("No client found with that ID.");
-            return;
+        try {
+            Set<LegoSet> wishlist = clientDao.getWishlist(clientId);
+            if (wishlist.isEmpty()) {
+                System.out.println("Wishlist is empty.");
+            } else {
+                System.out.println("Wishlist:");
+                for (LegoSet set : wishlist) {
+                    System.out.println(set);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to retrieve wishlist: " + e.getMessage());
         }
-        System.out.println(client.getWishlist());
     }
 
     public static void createNewMinifig(Scanner scanner) {

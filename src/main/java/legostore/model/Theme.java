@@ -22,4 +22,9 @@ public enum Theme {
         }
         return sb.toString().trim();
     }
+
+    public static Theme fromInput(String input) {
+        String normalized = input.trim().toUpperCase().replace(' ', '_');
+        return Theme.valueOf(normalized);
+    }
 }

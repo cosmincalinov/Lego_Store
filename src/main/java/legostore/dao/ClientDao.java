@@ -1,9 +1,13 @@
 package legostore.dao;
 
 import legostore.model.Client;
+import legostore.model.LegoSet;
+
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ClientDao {
     private final Connection connection;
@@ -38,6 +42,39 @@ public class ClientDao {
             }
         }
         return clients;
+    }
+
+    public void addLegoSetToWishlist(long clientId, long legoSetId) throws SQLException {
+        String sql = "INSERT INTO client_wishlist (client_id, lego_set_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, clientId);
+            stmt.setLong(2, legoSetId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void removeLegoSetFromWishlist(long clientId, long legoSetId) throws SQLException {
+        String sql = "DELETE FROM client_wishlist WHERE client_id = ? AND lego_set_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, clientId);
+            stmt.setLong(2, legoSetId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public Set<LegoSet> getWishlist(long clientId) throws SQLException {
+        Set<LegoSet> wishlist = new HashSet<>();
+        String sql = "SELECT l.* FROM lego_sets l " +
+                "JOIN client_wishlist cw ON l.id = cw.lego_set_id " +
+                "WHERE cw.client_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, clientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                }
+            }
+        }
+        return wishlist;
     }
 
     public Client getClientById(long id) throws SQLException {

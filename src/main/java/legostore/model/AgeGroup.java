@@ -16,6 +16,16 @@ public enum AgeGroup {
         return ageRange;
     }
 
+    public static AgeGroup fromInput(String input) {
+        switch (input.trim().toLowerCase()) {
+            case "toddler": return TODDLER;
+            case "child":   return CHILD;
+            case "teen":    return TEEN;
+            case "adult":   return ADULT;
+            default: throw new IllegalArgumentException("Unknown age group: " + input);
+        }
+    }
+
     @Override
     public String toString() {
         return ageRange;
