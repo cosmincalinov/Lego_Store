@@ -298,7 +298,13 @@ public class Main {
     public static void addSaleToLegoSet(Scanner scanner) {
         System.out.print("Enter the set ID to put on sale: ");
         long setId = Long.parseLong(scanner.nextLine());
-        LegoSet set = repo.getSet(setId);
+        LegoSet set = null;
+        try {
+            set = repo.getLegoSetFromDatabase(setId);
+        } catch (SQLException e) {
+            System.out.println("Database error: " + e.getMessage());
+            return;
+        }
         if (set == null) {
             System.out.println("No set found with that ID.");
             return;
