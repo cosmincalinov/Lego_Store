@@ -92,4 +92,14 @@ public class LegoSetDao {
         }
         return sets;
     }
+
+    public void updateSalePrice(long legoSetId, double salePrice) throws SQLException {
+        String sql = "UPDATE lego_sets SET sale_price = ? WHERE id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, salePrice);
+            stmt.setLong(2, legoSetId);
+            stmt.executeUpdate();
+        }
+    }
 }

@@ -7,6 +7,7 @@ import legostore.model.*;
 import legostore.repository.*;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -310,6 +311,11 @@ public class Main {
             return;
         }
         set.setSalePrice(salePrice);
-        System.out.println(set.getName() + " is now on sale for " + salePrice + "!");
+        try {
+            repo.updateSalePrice(setId, salePrice);
+            System.out.println(set.getName() + " is now on sale for " + salePrice + "!");
+        } catch (SQLException e) {
+            System.out.println("Failed to update sale price in database: " + e.getMessage());
+        }
     }
 }

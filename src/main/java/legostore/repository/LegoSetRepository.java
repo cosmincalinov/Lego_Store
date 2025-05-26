@@ -3,6 +3,7 @@ package legostore.repository;
 import legostore.dao.LegoSetDao;
 import legostore.model.LegoSet;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -63,4 +64,9 @@ public class LegoSetRepository {
     public int size() {
         return sets.size();
     }
+
+    public void updateSalePrice(long legoSetId, double salePrice) throws SQLException {
+        dao.updateSalePrice(legoSetId, salePrice);
+    }
+
 }
