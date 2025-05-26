@@ -1,7 +1,9 @@
 package legostore.dao;
 
+import legostore.model.AgeGroup;
 import legostore.model.Client;
 import legostore.model.LegoSet;
+import legostore.model.Theme;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -71,6 +73,15 @@ public class ClientDao {
             stmt.setLong(1, clientId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
+                    LegoSet set = new LegoSet(
+                            rs.getLong("id"),
+                            rs.getInt("piece_count"),
+                            rs.getString("name"),
+                            Theme.valueOf(rs.getString("theme").toUpperCase()),
+                            rs.getDouble("price"),
+                            AgeGroup.valueOf(rs.getString("age_group"))
+                    );
+                    wishlist.add(set);
                 }
             }
         }
