@@ -1,16 +1,35 @@
 package legostore;
 
+import legostore.dao.ClientDao;
 import legostore.dao.LegoSetDao;
+import legostore.db.DatabaseUtil;
 import legostore.model.*;
 import legostore.repository.*;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     private static LegoSetRepository repo = new LegoSetRepository(new LegoSetDao());
     private static ClientRepository clientRepo = new ClientRepository();
+
+    private static Connection connection;
+
+    static {
+        try {
+            connection = DatabaseUtil.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static ClientDao clientDao = new ClientDao(connection);
+
+    public Main() throws SQLException {
+    }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -19,7 +38,7 @@ public class Main {
             String option = scanner.nextLine();
             switch (option) {
                 case "1":
-                    addNewClient(scanner);
+                    addNewClient(clientDao ,scanner);
                     break;
                 case "2":
                     addNewLegoSet(scanner);
@@ -40,7 +59,7 @@ public class Main {
                     listAllLegoSets();
                     break;
                 case "8":
-                    listAllClients();
+                    listAllClients(clientDao);
                     break;
                 case "9":
                     listLegoSetDetails(scanner);
@@ -137,35 +156,38 @@ public class Main {
         }
     }
 
-    public static void addNewClient(Scanner scanner ) {
+    public static void addNewClient(ClientDao clientDao, Scanner scanner) {
+        System.out.print("Enter client ID: ");
+        long id = Long.parseLong(scanner.nextLine());
+        System.out.print("Enter first name: ");
+        String firstName = scanner.nextLine();
+        System.out.print("Enter last name: ");
+        String lastName = scanner.nextLine();
+        System.out.print("Enter phone: ");
+        String phone = scanner.nextLine();
+
+        Client client = new Client(id, firstName, lastName, phone);
+
         try {
-            System.out.println("Enter client ID:");
-            long clientId = Long.parseLong(scanner.nextLine().trim());
-            if (clientRepo.containsClient(clientId)) {
-                System.out.println("A client with this ID already exists.");
-                return;
-            }
-
-            System.out.println("Enter client first name:");
-            String firstName = scanner.nextLine().trim();
-
-            System.out.println("Enter client last name:");
-            String lastName = scanner.nextLine().trim();
-
-            System.out.println("Enter client phone number:");
-            String phoneNumber = scanner.nextLine().trim();
-
-            Client client = new Client(clientId, firstName, lastName, phoneNumber);
-            clientRepo.addClient(client);
-            System.out.println("Client added successfully.");
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid ID. Please enter a number.");
+            clientDao.insertClient(client);
+            System.out.println("Client added successfully!");
+        } catch (SQLException e) {
+            System.out.println("Error adding client: " + e.getMessage());
         }
     }
 
-    public static void listAllClients() {
-        for(Client client : clientRepo.getAllClients()) {
-            System.out.println(client);
+    public static void listAllClients(ClientDao clientDao) {
+        try {
+            List<Client> clients = clientDao.getAllClients();
+            if (clients.isEmpty()) {
+                System.out.println("No clients found.");
+            } else {
+                for (Client client : clients) {
+                    System.out.println(client);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving clients: " + e.getMessage());
         }
     }
 
