@@ -64,7 +64,7 @@ public class ClientDao {
         }
     }
 
-    public Set<LegoSet> getWishlist(long clientId) throws SQLException {
+    public Set<LegoSet> getWishlist(long clientId, Client client) throws SQLException {
         Set<LegoSet> wishlist = new HashSet<>();
         String sql = "SELECT l.* FROM lego_sets l " +
                 "JOIN client_wishlist cw ON l.id = cw.lego_set_id " +
@@ -77,10 +77,11 @@ public class ClientDao {
                             rs.getLong("id"),
                             rs.getInt("piece_count"),
                             rs.getString("name"),
-                            Theme.valueOf(rs.getString("theme").toUpperCase()),
+                            Theme.valueOf(rs.getString("theme").replace(" ", "_").toUpperCase()),
                             rs.getDouble("price"),
                             AgeGroup.valueOf(rs.getString("age_group"))
                     );
+                    set.addObserver(client); // <-- THIS LINE ADDS THE OBSERVER!
                     wishlist.add(set);
                 }
             }

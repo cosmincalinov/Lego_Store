@@ -222,7 +222,8 @@ public class Main {
         System.out.print("Enter client ID: ");
         long clientId = Long.parseLong(scanner.nextLine());
         try {
-            Set<LegoSet> wishlist = clientDao.getWishlist(clientId);
+            Client client = clientDao.getClientById(clientId);
+            Set<LegoSet> wishlist = clientDao.getWishlist(clientId, client);
             if (wishlist.isEmpty()) {
                 System.out.println("Wishlist is empty.");
             } else {
