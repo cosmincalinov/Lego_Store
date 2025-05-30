@@ -41,7 +41,7 @@ public class LegoSetDao {
                         rs.getLong("id"),
                         rs.getInt("piece_count"),
                         rs.getString("name"),
-                        Theme.valueOf(rs.getString("theme").toUpperCase()),
+                        Theme.valueOf(rs.getString("theme").replace(" ", "_").toUpperCase()),
                         rs.getDouble("price"),
                         AgeGroup.valueOf(rs.getString("age_group"))
                 );
@@ -84,7 +84,7 @@ public class LegoSetDao {
                         rs.getLong("id"),
                         rs.getInt("piece_count"),
                         rs.getString("name"),
-                        Theme.valueOf(rs.getString("theme").toUpperCase()),
+                        Theme.valueOf(rs.getString("theme").replace(" ", "_").toUpperCase()),
                         rs.getDouble("price"),
                         AgeGroup.valueOf(rs.getString("age_group"))
                 ));

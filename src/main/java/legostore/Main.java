@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class Main {
     private static LegoSetRepository repo = new LegoSetRepository(new LegoSetDao());
-    private static ClientRepository clientRepo = new ClientRepository();
+    // private static ClientRepository clientRepo = new ClientRepository();
 
     private static Connection connection;
 
