@@ -33,7 +33,7 @@ public class Main {
     public Main() throws SQLException {
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             printMenu();
@@ -46,7 +46,7 @@ public class Main {
                     addNewLegoSet(scanner);
                     break;
                 case "3":
-                    addSaleToLegoSet(scanner);
+                    addSaleToLegoSet(clientDao, scanner);
                     break;
                 case "4":
                     addItemToWishlist(clientDao,scanner);
@@ -230,6 +230,10 @@ public class Main {
                 System.out.println("Wishlist:");
                 for (LegoSet set : wishlist) {
                     System.out.println(set);
+                    if (set.isOnSale()) {
+                        String message = "Lego set '" + set.getName() + "' is now on sale for $" + set.getEffectivePrice() + ".";
+                        set.notifyObservers(message);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -296,33 +300,47 @@ public class Main {
         }
     }
 
-    public static void addSaleToLegoSet(Scanner scanner) {
+    public static void addSaleToLegoSet(ClientDao clientDao, Scanner scanner) throws SQLException {
+        System.out.print("Enter client ID: ");
+        long clientId = Long.parseLong(scanner.nextLine());
+
         System.out.print("Enter the set ID to put on sale: ");
-        long setId = Long.parseLong(scanner.nextLine());
-        LegoSet set = null;
-        try {
-            set = repo.getLegoSetFromDatabase(setId);
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
+        long saleSetId = Long.parseLong(scanner.nextLine());
+
+        Client client = clientDao.getClientById(clientId);
+        if (client == null) {
+            System.out.println("No client found with that ID.");
             return;
         }
-        if (set == null) {
-            System.out.println("No set found with that ID.");
-            return;
+
+        Set<LegoSet> wishlist = clientDao.getWishlist(clientId, client); // addObserver(client) happens here
+
+        LegoSet setToSale = null;
+        for (LegoSet set : wishlist) {
+            if (set.getId() == saleSetId) {
+                setToSale = set;
+                break;
+            }
         }
-        System.out.println("Current price: " + set.getPrice());
-        System.out.print("Enter new sale price: ");
-        double salePrice = Double.parseDouble(scanner.nextLine());
-        if (salePrice >= set.getPrice()) {
-            System.out.println("Sale price must be less than current price.");
-            return;
-        }
-        set.setSalePrice(salePrice);
-        try {
-            repo.updateSalePrice(setId, salePrice);
-            System.out.println(set.getName() + " is now on sale for " + salePrice + "!");
-        } catch (SQLException e) {
-            System.out.println("Failed to update sale price in database: " + e.getMessage());
+
+        if (setToSale != null) {
+            System.out.println("Current price: " + setToSale.getPrice());
+            System.out.print("Enter new sale price: ");
+            double newSalePrice = Double.parseDouble(scanner.nextLine());
+            if (newSalePrice >= setToSale.getPrice()) {
+                System.out.println("Sale price must be less than current price.");
+                return;
+            }
+            setToSale.setSalePrice(newSalePrice); // Notifies observer(s) in memory!
+            try {
+                // Update the database with the new sale price
+                repo.updateSalePrice(setToSale.getId(), newSalePrice);
+                System.out.println(setToSale.getName() + " is now on sale for " + newSalePrice + "!");
+            } catch (SQLException e) {
+                System.out.println("Failed to update sale price in database: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Set not found in wishlist!");
         }
     }
 }
