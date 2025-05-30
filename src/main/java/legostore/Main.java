@@ -5,6 +5,7 @@ import legostore.dao.LegoSetDao;
 import legostore.db.DatabaseUtil;
 import legostore.model.*;
 import legostore.repository.*;
+import legostore.service.AuditService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -127,6 +128,7 @@ public class Main {
             LegoSet set = new LegoSet(setId, pieces, name, theme, price, ageGroup);
             repo.addSet(set);
             System.out.println("Lego set added successfully.");
+            AuditService.getInstance().logAction("add_new_set");
         } catch (Exception e) {
             System.out.println("Failed to add Lego set: " + e.getMessage());
         }
@@ -172,6 +174,7 @@ public class Main {
         try {
             clientDao.insertClient(client);
             System.out.println("Client added successfully!");
+            AuditService.getInstance().logAction("add_new_client");
         } catch (SQLException e) {
             System.out.println("Error adding client: " + e.getMessage());
         }
