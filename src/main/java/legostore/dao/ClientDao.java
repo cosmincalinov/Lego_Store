@@ -1,5 +1,6 @@
 package legostore.dao;
 
+import legostore.db.DatabaseUtil;
 import legostore.model.AgeGroup;
 import legostore.model.Client;
 import legostore.model.LegoSet;
@@ -46,12 +47,39 @@ public class ClientDao {
         return clients;
     }
 
+    public LegoSet getLegoSetById(long id) throws SQLException {
+        String sql = "SELECT * FROM lego_sets WHERE id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new LegoSet(
+                        rs.getLong("id"),
+                        rs.getInt("piece_count"),
+                        rs.getString("name"),
+                        Theme.valueOf(rs.getString("theme").replace(" ", "_").toUpperCase()),
+                        rs.getDouble("price"),
+                        AgeGroup.valueOf(rs.getString("age_group"))
+                );
+            }
+            return null;
+        }
+    }
+
     public void addLegoSetToWishlist(long clientId, long legoSetId) throws SQLException {
         String sql = "INSERT INTO client_wishlist (client_id, lego_set_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, clientId);
             stmt.setLong(2, legoSetId);
             stmt.executeUpdate();
+        }
+
+        Client client = getClientById(clientId);
+        LegoSet legoSet = getLegoSetById(legoSetId);
+
+        if (client != null && legoSet != null) {
+            legoSet.addObserver(client);
         }
     }
 
@@ -81,7 +109,7 @@ public class ClientDao {
                             rs.getDouble("price"),
                             AgeGroup.valueOf(rs.getString("age_group"))
                     );
-                    set.addObserver(client); // <-- THIS LINE ADDS THE OBSERVER!
+                    set.addObserver(client);
                     wishlist.add(set);
                 }
             }

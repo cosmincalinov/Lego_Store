@@ -42,7 +42,7 @@ public class LegoSet extends Product implements Subject {
     public void setSalePrice(double salePrice) {
         this.onSale = true;
         this.salePrice = salePrice;
-        notifyObservers("Lego set '" + getName() + "' is now on sale for $" + salePrice + ".");
+        this.notifyObservers("Lego set '" + getName() + "' is now on sale for $" + salePrice + ".");
     }
 
     public void removeSale() {
