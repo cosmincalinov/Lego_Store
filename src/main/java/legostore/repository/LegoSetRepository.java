@@ -3,7 +3,6 @@ package legostore.repository;
 import legostore.dao.LegoSetDao;
 import legostore.model.LegoSet;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 

@@ -3,6 +3,9 @@ package legostore;
 import legostore.dao.ClientDao;
 import legostore.dao.LegoSetDao;
 import legostore.db.DatabaseUtil;
+import legostore.exception.LegoStoreException;
+import legostore.exception.NegativePrice;
+import legostore.exception.WrongInput;
 import legostore.model.*;
 import legostore.repository.*;
 import legostore.service.AuditService;
@@ -31,52 +34,60 @@ public class Main {
 
     private static ClientDao clientDao = new ClientDao(connection);
 
-    public Main() throws SQLException {
-    }
-
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
-        while (true) {
-            printMenu();
-            String option = scanner.nextLine();
-            switch (option) {
-                case "1":
-                    addNewClient(clientDao ,scanner);
-                    break;
-                case "2":
-                    addNewLegoSet(scanner);
-                    break;
-                case "3":
-                    addSaleToLegoSet(clientDao, scanner);
-                    break;
-                case "4":
-                    addItemToWishlist(clientDao,scanner);
-                    break;
-                case "5":
-                    removeItemFromWishlist(clientDao, scanner);
-                    break;
-                case "6":
-                    listWishlist(clientDao, scanner);
-                    break;
-                case "7":
-                    listAllLegoSets();
-                    break;
-                case "8":
-                    listAllClients(clientDao);
-                    break;
-                case "9":
-                    listLegoSetDetails(scanner);
-                    break;
-                case "10":
-                    createNewMinifig(scanner);
-                    break;
-                case "0":
-                    System.out.println("Exiting...");
-                    scanner.close();
-                    return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+        try {
+            while (true) {
+                printMenu();
+                String option = scanner.nextLine();
+                switch (option) {
+                    case "1":
+                        addNewClient(clientDao, scanner);
+                        break;
+                    case "2":
+                        addNewLegoSet(scanner);
+                        break;
+                    case "3":
+                        addSaleToLegoSet(clientDao, scanner);
+                        break;
+                    case "4":
+                        addItemToWishlist(clientDao, scanner);
+                        break;
+                    case "5":
+                        removeItemFromWishlist(clientDao, scanner);
+                        break;
+                    case "6":
+                        listWishlist(clientDao, scanner);
+                        break;
+                    case "7":
+                        listAllLegoSets();
+                        break;
+                    case "8":
+                        listAllClients(clientDao);
+                        break;
+                    case "9":
+                        listLegoSetDetails(scanner);
+                        break;
+                    case "10":
+                        createNewMinifig(scanner);
+                        break;
+                    case "0":
+                        System.out.println("Exiting...");
+                        scanner.close();
+                        return;
+                    default:
+                        throw new WrongInput("Please select a valid option from the menu.");
+                }
             }
+        }
+        catch (WrongInput e) {
+            System.out.println(e.getMessage());
+            main(args);
+        }
+        catch (LegoStoreException e) {
+            System.out.println("Something went really wrong: " + e.getMessage() + ". Exiting.");
+            scanner.close();
+            return;
         }
     }
 
@@ -123,10 +134,19 @@ public class Main {
             AgeGroup ageGroup = AgeGroup.fromInput(scanner.nextLine());
 
             System.out.print("Enter the price: ");
-            double price = Double.parseDouble(scanner.nextLine());
+            try {
+                double price = Double.parseDouble(scanner.nextLine());
+                if (price <= 0) {
+                    throw new NegativePrice("Price must be greater than zero.");
+                }
 
-            LegoSet set = new LegoSet(setId, pieces, name, theme, price, ageGroup);
-            repo.addSet(set);
+                LegoSet set = new LegoSet(setId, pieces, name, theme, price, ageGroup);
+                repo.addSet(set);
+            }
+            catch (NegativePrice e) {
+                System.out.println(e.getMessage());
+                return;
+            }
             System.out.println("Lego set added successfully.");
             AuditService.getInstance().logAction("add_new_set");
         } catch (Exception e) {
